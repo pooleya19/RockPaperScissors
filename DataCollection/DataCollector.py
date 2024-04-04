@@ -26,7 +26,7 @@ class DataCollector:
         self.useMask = False
 
         # Save
-        self.path_imageFolder = "Images"
+        self.path_imageFolder = "ImagesAdam"
         self.name_rock = "R"
         self.name_paper = "P"
         self.name_scissors = "S"
