@@ -20,6 +20,7 @@ class DataCollector:
         self.color_camera_background = (255,255,255,255)
 
         # Camera
+        self.cameraIndex = 0
         self.cameraResolution_base = (640,480)
         self.cameraResolution_final = (300,300)
         self.useMask = False
@@ -31,6 +32,7 @@ class DataCollector:
         self.name_scissors = "S"
 
         # ===== Read prior images =====
+        os.makedirs(self.path_imageFolder, exist_ok=True)
         dir_list = os.listdir(self.path_imageFolder)
         largestNum = 0
         for item in dir_list:
@@ -38,6 +40,7 @@ class DataCollector:
             itemNumber = itemName.split("_")[1]
             largestNum = max(largestNum, int(itemNumber)+1)
         print("Loaded ", len(dir_list), " previous entries. Beginning at item ", largestNum, ".", sep='')
+        self.nextImageNumber = largestNum
 
         # ===== Init Pygame window =====
         self.screen = pygame.display.set_mode((self.width_screen, self.height_screen))
@@ -59,10 +62,9 @@ class DataCollector:
             for camera in cameras:
                 print("\t", str(camera), sep='')
 
-            print("Opening camera 0:", cameras[0])
-            self.camera = pygame.camera.Camera(cameras[0], self.cameraResolution_base)
+            print("Opening camera ", self.cameraIndex, ": ", cameras[self.cameraIndex], sep='')
+            self.camera = pygame.camera.Camera(cameras[self.cameraIndex], self.cameraResolution_base)
             self.camera.start()
-            # self.image = self.camera.get_image()
             self.image = None
           
         self.background_camera = pygame.Surface(self.cameraResolution_final)
@@ -101,11 +103,11 @@ class DataCollector:
                     print("Escape key pressed; Aborting.")
                     self.quit()
                 elif self.getKey(K_1):
-                    self.saveImage(1)
+                    self.saveImage(self.name_rock)
                 elif self.getKey(K_2):
-                    self.saveImage(2)
+                    self.saveImage(self.name_paper)
                 elif self.getKey(K_3):
-                    self.saveImage(3)
+                    self.saveImage(self.name_scissors)
                     
     def updateCamera(self):
         if not self.camera.query_image():
@@ -142,8 +144,14 @@ class DataCollector:
         if self.image is not None:
             self.screen.blit(self.image, (0, 0))
     
-    def saveImage(self, imageNum):
-        print("Saving image ", imageNum, ".", sep='')
+    def saveImage(self, imageName):
+        imagePath = self.path_imageFolder + "/" + imageName + "_" + str(self.nextImageNumber) + ".jpg"
+        self.nextImageNumber += 1
+
+        print("Saving image ", imagePath, ".", sep='')
+        pygame.image.save(self.image, imagePath)
+        # image = Image.open(pygame.image.tobytes(self.image))
+        # image.save(imagePath)
 
     def getKey(self, key):
         return pygame.key.get_pressed()[key]
