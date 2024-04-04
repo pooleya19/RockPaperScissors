@@ -7,7 +7,8 @@ import random
 import time
 
 labels = np.load("Data/labels.npy")
-data = np.load("Data/data.npy").T
+data = np.load("Data/data_150_gray.npy").T
+imageShape = (150,150,1)
 
 print("All data:")
 print("\tlabels.shape:",labels.shape)
@@ -27,7 +28,10 @@ print("Labels:", labelNums)
 while True:
     picIndex = random.randint(0, data.shape[1]-1)
     picArrayFlat = data[:,picIndex]
-    picArray = np.reshape(picArrayFlat, [300,300,3])
-    plt.imshow(picArray)
+    picArray = np.reshape(picArrayFlat, imageShape)
+    if picArray.shape[2] == 1:
+        plt.imshow(picArray, cmap='gray')
+    else:
+        plt.imshow(picArray)
     plt.title("Image " + str(picIndex) + ", Label " + str(labels[picIndex]))
     plt.show()
