@@ -7,8 +7,8 @@ import numpy as np
 import pygame
 
 def compactData():
-    paths_imageFolder = ["ImagesOscar", "ImagesJack", "ImagesAlex", "ImagesAdam"]
-    path_savedData = "Data"
+    paths_imageFolder = ["ImagesOscar2", "ImagesJack2", "ImagesAlex2", "ImagesAdam2"]
+    path_savedData = "Data/All2"
     label_map = {"R":0, "P":1, "S":2}
 
     # Check folders

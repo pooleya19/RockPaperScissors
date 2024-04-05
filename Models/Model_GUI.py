@@ -30,6 +30,7 @@ print("Done!")
 print("Size of BASE_DATA:",sys.getsizeof(BASE_DATA))
 print("Size of BASE_LABELS:",sys.getsizeof(BASE_LABELS))
 
+modelFilePath = "Params3.pkl"
 
 
 figsize = 150
@@ -322,9 +323,8 @@ else:
     # LOAD MODEL PARAMETERS (only once)
     import pickle
 
-    filePath = "Params.pkl"
     print("Loading model... ", end='', flush=True)
-    with open(filePath, "rb") as file:
+    with open(modelFilePath, "rb") as file:
         model_parameters = pickle.load(file)
     print("Done!")
     
@@ -346,17 +346,32 @@ else:
 labelMap = {0:"ROCK", 1:"PAPER", 2:"SCISSORS"}
 
 def predictPicture(pic):
-    plt.imshow(pic.reshape((150,150,1)), cmap="gray")
-    plt.show()
     model.eval()
     with torch.no_grad():
-        output_tensor = model(torch.from_numpy(pic).float().reshape((1,1,150,150)))
-        print(output_tensor)
-        predictionNum = np.argmax(output_tensor.numpy())
-        print(predictionNum)
+        dataTensor = torch.from_numpy(pic).float().reshape((1,1,150,150))
+        output_tensor = model(dataTensor)
+        output_numpy = output_tensor.numpy()
+        certainties = np.exp(output_numpy).reshape(-1)
+        predictionNum = np.argmax(output_numpy)
         prediction = labelMap[predictionNum]
-        print(prediction)
-        return prediction
+        return prediction, certainties
+
+
+# data = np.load("Data/AdamTest/data_150_gray.npy")
+# labels = np.load("Data/AdamTest/labels.npy")
+# numTestSamples = data.shape[0]
+
+# tensor = torch.from_numpy(data).float().reshape((numTestSamples,1,150,150))
+
+# model.eval()
+# with torch.no_grad():
+#     output_tensor = model(tensor)
+#     predictions = np.argmax(torch.as_tensor(output_tensor).cpu().numpy(), axis=1)
+
+#     accuracy = accuracy_score(labels, predictions)
+#     print("Accuracy:", accuracy)
+#     print("Confusion matrix:")
+#     print(confusion_matrix(labels, predictions))
 
 from DataTester import DataTester
 
