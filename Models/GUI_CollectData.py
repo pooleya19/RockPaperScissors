@@ -30,7 +30,7 @@ print("Done!")
 print("Size of BASE_DATA:",sys.getsizeof(BASE_DATA))
 print("Size of BASE_LABELS:",sys.getsizeof(BASE_LABELS))
 
-modelFilePath = "Params3.pkl"
+modelFilePath = "Params_All2_1.pkl"
 
 
 figsize = 150
