@@ -24,14 +24,14 @@ import pickle
 
 # LOAD BASE DATA (only once)
 print("Loading data... ",end='',flush=True)
-BASE_DATA = np.load("Data/data_150_gray.npy")
-BASE_LABELS = np.load("Data/labels.npy")
+BASE_DATA = np.load("../Data/data_150_gray.npy")
+BASE_LABELS = np.load("../Data/labels.npy")
 print("Done!")
 print("Size of BASE_DATA:",sys.getsizeof(BASE_DATA))
 print("Size of BASE_LABELS:",sys.getsizeof(BASE_LABELS))
 
-modelFilePath = "Params_All2_1.pkl"
-
+modelFilePath = "../Params_All2_1.pkl"
+retrainModel = False # FALSE
 
 figsize = 150
 batch_size = 64
@@ -288,10 +288,6 @@ def calculateAccuracy(testModel, testMode, printOutput=False):
     testModel.train()
     return accuracy
 
-
-
-retrainModel = False
-
 if retrainModel:
     # Train model
     n_epochs = 20
@@ -373,8 +369,8 @@ def predictPicture(pic):
 #     print("Confusion matrix:")
 #     print(confusion_matrix(labels, predictions))
 
-from DataTester import DataTester
+from DisplayCheater import DisplayCheater
 
-dataTester = DataTester(predictPicture)
-while dataTester.running:
-    dataTester.update()
+display = DisplayCheater(predictPicture)
+while display.running:
+    display.update()
