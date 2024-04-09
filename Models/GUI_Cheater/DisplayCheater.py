@@ -32,7 +32,7 @@ class DisplayCheater:
 
         # ===== Init Pygame window =====
         self.screen = pygame.display.set_mode((self.width_screen, self.height_screen))
-        pygame.display.set_caption("RockPaperScissors Data Collector")
+        pygame.display.set_caption("RockPaperScissors Game")
 
         self.background = pygame.Surface(self.screen.get_size())
         self.background = self.background.convert()
@@ -68,7 +68,18 @@ class DisplayCheater:
         self.playing = False
         self.playingStartTime = 0
         self.loadTime = 1
-        self.gameDelay = 1
+        self.gameDelay = 0.7
+        self.cheatDelay = 0.1
+        self.move = None
+        self.labelMap = {0:"Rock", 1:"Paper", 2:"Scissors"}
+        self.prediction = None
+
+        # ===== Load pictures =====
+        desiredSize = 150
+        imageRock = pygame.transform.scale(pygame.image.load("Figures/Rock.jpg"), (desiredSize,desiredSize))
+        imagePaper = pygame.transform.scale(pygame.image.load("Figures/Paper.jpg"), (desiredSize,desiredSize))
+        imageScissors = pygame.transform.scale(pygame.image.load("Figures/Scissors.jpg"), (desiredSize,desiredSize))
+        self.movePics = [imageRock, imagePaper, imageScissors]
 
     def update(self):
         self.handleEvents()
@@ -100,6 +111,7 @@ class DisplayCheater:
 
         self.playing = True
         self.playingStartTime = time.time()
+        self.move = None
 
     def convertSurfaceToNumpy(self, surface):
         npImage = np.frombuffer(self.image.get_buffer(), dtype=np.uint8).reshape((self.cameraResolution_final[0], self.cameraResolution_final[1],-1))
@@ -107,7 +119,7 @@ class DisplayCheater:
                     
     def makePredictionFunc(self):
         if self.image is None:
-            return
+            return None
         
         npImage = self.convertSurfaceToNumpy(self.image)
         npImageGray = np.uint8(0.2989*npImage[:,:,0] + 0.5870*npImage[:,:,1] + 0.1140*npImage[:,:,2])
@@ -116,11 +128,13 @@ class DisplayCheater:
         image_flat = image_down.reshape((1,-1))
 
         predictFunc = self.predictPicture
-        prediction, certainties = predictFunc(image_flat)
+        prediction, certainties, confidences = predictFunc(image_flat)
         # print("PREDICTION: ", prediction)
 
         self.prediction = prediction
         self.certainties = certainties
+
+        return prediction
 
 
     def updateCamera(self):
@@ -172,12 +186,21 @@ class DisplayCheater:
             gameStartText += ", Scissors"
         if elapsedTime >= self.loadTime + 3*self.gameDelay:
             gameStartText += ", Shoot!"
+        if elapsedTime >= self.loadTime + 3*self.gameDelay + self.cheatDelay and self.playing:
+            while self.makePredictionFunc() is None:
+                pass
+            self.move = int((self.prediction+1)%3)
             self.playing = False
         textSurface_gameStart = getTextSurface(gameStartText, size=25)
-        
+
+        surface_move = None
+        if self.move is not None:
+            surface_move = getTextSurface(self.labelMap[self.move], size=50)
+            self.screen.blit(surface_move, (375,70))
+            self.screen.blit(self.movePics[self.move], (375,120))
 
         self.screen.blit(textSurface_loadingGame, (300,0))
-        self.screen.blit(textSurface_gameStart, (300, 100))
+        self.screen.blit(textSurface_gameStart, (300,40))
     
     def saveImage(self, imageName):
         imagePath = self.path_imageFolder + "/" + imageName + "_" + str(self.nextImageNumber) + ".jpg"

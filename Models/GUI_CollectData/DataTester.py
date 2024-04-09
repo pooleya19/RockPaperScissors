@@ -66,9 +66,11 @@ class DataTester:
 
         # ===== Predictions =====
         self.certainties = [0,0,0]
-        self.prediction = "None lmao"
+        self.confidences = [0,0,0]
+        self.predictedLabel = "None lmao"
         self.lastPredictionTime = 0
         self.predictionRate = 10 # Hz
+        self.labelMap = {0:"Rock", 1:"Paper", 2:"Scissors"}
 
     def update(self):
         currentTime = time.time()
@@ -117,11 +119,11 @@ class DataTester:
         image_flat = image_down.reshape((1,-1))
 
         predictFunc = self.predictPicture
-        prediction, certainties = predictFunc(image_flat)
-        # print("PREDICTION: ", prediction)
+        prediction, certainties, confidences = predictFunc(image_flat)
 
-        self.prediction = prediction
+        self.predictedLabel = self.labelMap[prediction]
         self.certainties = certainties
+        self.confidences = confidences
 
 
     def updateCamera(self):
@@ -160,16 +162,16 @@ class DataTester:
             self.screen.blit(self.image, (0, 0))
 
         # Predictions
-        textSurface_CertaintiesTitle = getTextSurface("Certainties:", size=50)
+        textSurface_CertaintiesTitle = getTextSurface("Confidences:", size=50)
         textSurface_RockTitle = getTextSurface("Rock:", size=30)
         textSurface_PaperTitle = getTextSurface("Paper:", size=30)
         textSurface_ScissorsTitle = getTextSurface("Scissors:", size=30)
         textSurface_PredictionTitle = getTextSurface("Prediction:", size=50)
 
-        textSurface_RockCertainty = getTextSurface(str(np.round(self.certainties[0],3)), size=30)
-        textSurface_PaperCertainty = getTextSurface(str(np.round(self.certainties[1],3)), size=30)
-        textSurface_ScissorsCertainty = getTextSurface(str(np.round(self.certainties[2],3)), size=30)
-        textSurface_Prediction = getTextSurface(str(self.prediction), size=30)
+        textSurface_RockCertainty = getTextSurface(str(np.round(self.confidences[0],3)), size=30)
+        textSurface_PaperCertainty = getTextSurface(str(np.round(self.confidences[1],3)), size=30)
+        textSurface_ScissorsCertainty = getTextSurface(str(np.round(self.confidences[2],3)), size=30)
+        textSurface_Prediction = getTextSurface(str(self.predictedLabel), size=30)
 
         textX1 = 350
         textX2 = 470

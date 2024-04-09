@@ -336,6 +336,14 @@ else:
     model.eval()
 
 
+from torchvision.models.feature_extraction import create_feature_extractor
+model.eval()
+    
+nodeConf = 'linear_layers.5'
+nodeEnd = 'linear_layers.6'
+testModelConf = create_feature_extractor(model, return_nodes=[nodeConf, nodeEnd])
+# testModelConf.cuda()
+testModelConf.eval()
 
 # calculateAccuracy(model, "train", True)
 # calculateAccuracy(model, "val", True)
@@ -349,12 +357,23 @@ def predictPicture(pic):
     model.eval()
     with torch.no_grad():
         dataTensor = torch.from_numpy(pic).float().reshape((1,1,150,150))
-        output_tensor = model(dataTensor)
-        output_numpy = output_tensor.numpy()
-        certainties = np.exp(output_numpy).reshape(-1)
-        predictionNum = np.argmax(output_numpy)
-        prediction = labelMap[predictionNum]
-        return prediction, certainties
+        # output_tensor = model(dataTensor)
+        # output_numpy = output_tensor.numpy()
+        # certainties = np.exp(output_numpy).reshape(-1)
+        # predictionNum = np.argmax(output_numpy)
+        # prediction = labelMap[predictionNum]
+        # return prediction, certainties
+    
+        output_nodes = testModelConf(dataTensor)
+        outputConfidence = output_nodes[nodeConf].cpu().numpy()
+        outputEnd = output_nodes[nodeEnd].cpu().numpy()
+
+        confidences = outputConfidence[0]
+        certainties = np.exp(outputEnd).reshape(-1)
+        prediction = np.argmax(outputEnd, axis=1)[0]
+        # highestConfidence = confidences[prediction]
+        # predictedLabel = labelMap[prediction]
+        return prediction, certainties, confidences
 
 
 # data = np.load("Data/AdamTest/data_150_gray.npy")
