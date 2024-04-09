@@ -67,12 +67,14 @@ class DisplayCheater:
         # ===== Game =====
         self.playing = False
         self.playingStartTime = 0
-        self.loadTime = 1
-        self.gameDelay = 0.7
-        self.cheatDelay = 0.1
+        self.loadTime = 0.6
+        self.gameDelay = 0.6
+        self.cheatDelay = 0.065
         self.move = None
         self.labelMap = {0:"Rock", 1:"Paper", 2:"Scissors"}
         self.prediction = None
+        self.lastPredictionTime = 0
+        self.predictionRate = 20
 
         # ===== Load pictures =====
         desiredSize = 150
@@ -82,6 +84,11 @@ class DisplayCheater:
         self.movePics = [imageRock, imagePaper, imageScissors]
 
     def update(self):
+        # currentTime = time.time()
+        # if currentTime - self.lastPredictionTime >= 1/self.predictionRate:
+        #     self.lastPredictionTime = currentTime
+        #     self.makePredictionFunc()
+
         self.handleEvents()
         self.updateCamera()
         self.draw()
@@ -134,6 +141,7 @@ class DisplayCheater:
         self.prediction = prediction
         self.certainties = certainties
 
+        self.move = int((self.prediction+1)%3)
         return prediction
 
 
