@@ -9,8 +9,11 @@ from PIL import Image
 
 
 class DisplayGameplay:
-    def __init__(self, predictPicture):
+    def __init__(self, predictPicture, strategy, storeCorrectMove, readyToPlay):
         self.predictPicture = predictPicture
+        self.strategy = strategy
+        self.storeCorrectMove = storeCorrectMove
+        self.readyToPlay = readyToPlay
 
         pygame.init()
         self.running = True
@@ -96,6 +99,8 @@ class DisplayGameplay:
         time.sleep(0.001)
 
     def handleEvents(self):
+        storeCorrectMoveFunc = self.storeCorrectMove
+
         # Check if program is alive
         if not self.running:
             return
@@ -110,8 +115,19 @@ class DisplayGameplay:
                     self.quit()
                 elif self.getKey(K_SPACE):
                     self.startGame()
+                elif self.getKey(K_0):
+                    storeCorrectMoveFunc(0)
+                elif self.getKey(K_1):
+                    storeCorrectMoveFunc(1)
+                elif self.getKey(K_2):
+                    storeCorrectMoveFunc(2)
     
     def startGame(self):
+        readyToPlayFunc = self.readyToPlay
+        if not readyToPlayFunc():
+            # Model NOT ready to play (for whatever reason)
+            return
+
         if self.playing:
             # Game already playing
             return
@@ -141,7 +157,7 @@ class DisplayGameplay:
         self.prediction = prediction
         self.certainties = certainties
 
-        self.move = int((self.prediction+1)%3)
+        # self.move = int((self.prediction+1)%3)
         return prediction
 
 
@@ -195,9 +211,10 @@ class DisplayGameplay:
         if elapsedTime >= self.loadTime + 3*self.gameDelay:
             gameStartText += ", Shoot!"
         if elapsedTime >= self.loadTime + 3*self.gameDelay + self.cheatDelay and self.playing:
+            strategyFunc = self.strategy
+            self.move = strategyFunc()
             while self.makePredictionFunc() is None:
                 pass
-            self.move = int((self.prediction+1)%3)
             self.playing = False
         textSurface_gameStart = getTextSurface(gameStartText, size=25)
 
