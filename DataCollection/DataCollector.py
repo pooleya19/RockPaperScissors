@@ -7,6 +7,8 @@ import time
 
 class DataCollector:
     def __init__(self):
+        self.path_imageFolder = "Test"
+
         pygame.init()
         self.running = True
 
@@ -26,7 +28,6 @@ class DataCollector:
         self.useMask = False
 
         # Save
-        self.path_imageFolder = "Test"
         self.name_rock = "R"
         self.name_paper = "P"
         self.name_scissors = "S"

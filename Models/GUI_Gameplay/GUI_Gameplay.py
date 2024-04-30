@@ -21,6 +21,8 @@ import sys
 import pickle
 import time
 
+modelFilePath = "../Params_All2_1.pkl"
+
 print()
 print("=========================================================================================================================")
 print("USER INSTRUCTIONS:")
@@ -30,8 +32,6 @@ print("\t\tThis is not used in gameplay; this is used to calculate classificatio
 print("(Waiting 5 seconds...)")
 print("=========================================================================================================================")
 time.sleep(5)
-
-modelFilePath = "../Params_All2_1.pkl"
 
 figsize = 150
 batch_size = 64

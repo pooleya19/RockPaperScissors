@@ -1,6 +1,8 @@
 import numpy as np
 from PIL import Image
 
+folderPath = "Data/Adam"
+
 # InputData.shape = [numImages,WxWx3]
 # InputData.shape = [numImages,WxWx1]
 def grayscale(inputData):
@@ -46,19 +48,9 @@ def pp_300color_to_150gray(inputData):
     down = downscale_300_to_150(gray)
     return down
 
-def postProcess_data():
-    data_300 = np.load("Data/All2/data.npy")
-    data_gray = grayscale(data_300)
-    data_150_gray = downscale_300_to_150(data_gray)
-    np.save("Data/All2/data_gray.npy", data_gray)
-    np.save("Data/All2/data_150_gray.npy", data_150_gray)
-
-def postProcess_dataTest():
-    data_300 = np.load("Data/AdamTest/data.npy")
-    data_gray = grayscale(data_300)
-    data_150_gray = downscale_300_to_150(data_gray)
-    np.save("Data/AdamTest/data_gray.npy", data_gray)
-    np.save("Data/AdamTest/data_150_gray.npy", data_150_gray)
-
 if __name__ == "__main__":
-    postProcess_data()
+    data_300 = np.load(folderPath + "/data.npy")
+    data_gray = grayscale(data_300)
+    data_150_gray = downscale_300_to_150(data_gray)
+    np.save(folderPath + "/data_gray.npy", data_gray)
+    np.save(folderPath + "/data_150_gray.npy", data_150_gray)

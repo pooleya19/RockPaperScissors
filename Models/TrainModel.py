@@ -1,38 +1,30 @@
-# import pandas as pd
+
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import model_selection  
 from sklearn.metrics import confusion_matrix 
-# import tqdm
 import torch
 import torch.nn as nn
-# import torchvision
 from torchvision import transforms
-# import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-# import torchvision.models as models
-# import torchvision.transforms.functional as fn
 from torch.autograd import Variable
-# import cv2
 from sklearn.metrics import accuracy_score
 import sys
-# import os
-# import gc
 import pickle
 
+BASE_DATA = np.load("Data/All2/data_150_gray.npy")
+BASE_LABELS = np.load("Data/All2/labels.npy")
+modelFilePath = "Params_Test.pkl"
+retrainModel = True
+n_epochs = 8
+saveModel = True
 
 
 # LOAD BASE DATA (only once)
 print("Loading data... ",end='',flush=True)
-BASE_DATA = np.load("../Data/data_150_gray.npy")
-BASE_LABELS = np.load("../Data/labels.npy")
 print("Done!")
-print("Size of BASE_DATA:",sys.getsizeof(BASE_DATA))
-print("Size of BASE_LABELS:",sys.getsizeof(BASE_LABELS))
 
-modelFilePath = "../Params_All2_1.pkl"
-
-
+mod_epoch = 4
 figsize = 150
 batch_size = 64
 dataImages = BASE_DATA
@@ -62,7 +54,6 @@ print("dataval.shape:\t\t",dataval.shape)
 print("datatest.shape:\t\t",datatest.shape)
 
 
-
 class MyData(Dataset):
         def __init__(self, X, t, transform=None):
             self.X = X.float()
@@ -82,10 +73,10 @@ class MyData(Dataset):
 train_aug = transforms.Compose([
         # transforms.ToPILImage(),
         # transforms.ColorJitter(brightness=.05, contrast=.05),
-        # transforms.RandomRotation(degrees=(-180,180)),
+        transforms.RandomRotation(degrees=(-180,180)),
         # transforms.RandomResizedCrop(figsize),
-        # transforms.RandomVerticalFlip(0.2),
-        # transforms.RandomHorizontalFlip(0.4),
+        transforms.RandomVerticalFlip(0.5),
+        transforms.RandomHorizontalFlip(0.5),
         transforms.RandomPerspective(distortion_scale=0.2),
         transforms.GaussianBlur(kernel_size=(3,3)),
         # transforms.ToTensor(),
@@ -117,7 +108,6 @@ test_data = MyData(datatest,labeltest,transform=test_aug)
 train_load = DataLoader(dataset=train_data,batch_size=batch_size,shuffle=False)
 val_load = DataLoader(dataset=val_data,batch_size=batch_size,shuffle=False)
 test_load = DataLoader(dataset=test_data,batch_size = batch_size, shuffle=False)
-
 
 
 class CNN(nn.Module):
@@ -173,7 +163,6 @@ class CNN(nn.Module):
             x = x.view(x.size(0), -1)
             x = self.linear_layers(x)
             return x
-        
 
 
 model = CNN()
@@ -198,7 +187,6 @@ print(model)
 # print("Size of model:",sys.getsizeof(model)) # = 48
 # print("Size of optimizer:",sys.getsizeof(optimizer)) # = 48
 # print("Size of criterion:",sys.getsizeof(criterion)) # = 48
-
 
 
 def train(epoch, validate):
@@ -248,7 +236,6 @@ def train(epoch, validate):
         val_losses.append(loss_val.item())
 
 
-
 # testMode should be 1 of the following: "train", "val", "test"
 def calculateAccuracy(testModel, testMode, printOutput=False):
     testModel.eval()
@@ -289,34 +276,22 @@ def calculateAccuracy(testModel, testMode, printOutput=False):
     return accuracy
 
 
-
-retrainModel = False
-
 if retrainModel:
     # Train model
-    n_epochs = 20
-    mod_epoch = 4
 
+    print("Beginning Training (This may take a while...)")
     for epoch in range(n_epochs):
         train(epoch, epoch % mod_epoch == 0)
 
-        loss_train = train_losses[-1] # Get last element in list
-
-        msg = "Epoch: " + str(epoch)
-        msg += "\tLoss: " + np.format_float_scientific(loss_train, precision=3)
-        msg += "\tMemory Allocated: " + np.format_float_scientific(torch.cuda.memory_allocated(), precision=3)
-
-        if False:
-            trainAccuracy = calculateAccuracy(model, "train")
-            valAccuracy = calculateAccuracy(model, "val")
-            testAccuracy = calculateAccuracy(model, "test")
-
-            msg += "\tAccuracy: Train: " + np.format_float_scientific(trainAccuracy, precision=3)
-            msg += "\tVal: " + np.format_float_scientific(valAccuracy, precision=3)
-            msg += "\tTest: " + np.format_float_scientific(testAccuracy, precision=3)
-
         if epoch % mod_epoch == 0:
-            print(msg)
+            loss_train = train_losses[-1] # Get last element in list
+            print("Epoch: ", epoch, "\tLoss: ", np.format_float_scientific(loss_train, precision=3), sep='')
+            if saveModel:
+                print("\tSaving model... ", end='', flush=True)
+                model_parameters = model.state_dict()
+                with open(modelFilePath, "wb") as file:
+                    pickle.dump(model_parameters, file)
+                print("Done!")
 else:
     # Load model
     
@@ -332,68 +307,55 @@ else:
     model.load_state_dict(model_parameters)
     
     # Define test model
-    # model.cuda()
+    model.cuda()
     model.eval()
 
 
-from torchvision.models.feature_extraction import create_feature_extractor
+plt.plot(np.asarray(train_losses), label = 'Training Loss', marker = 'o')
+plt.plot(np.asarray(val_losses), label = 'Validation Loss', marker = '.')
+plt.legend()
+plt.xlabel('Epochs')
+plt.ylabel('Loss Function')
+plt.show()
+
+
+calculateAccuracy(model, "train", True)
+calculateAccuracy(model, "val", True)
+
+accuracies = [calculateAccuracy(model, "test", False) for i in range(10)]
+print(np.mean(accuracies))
+
+
+# Generate nice heatmap
 model.eval()
-    
-nodeConf = 'linear_layers.5'
-nodeEnd = 'linear_layers.6'
-testModelConf = create_feature_extractor(model, return_nodes=[nodeConf, nodeEnd])
-# testModelConf.cuda()
-testModelConf.eval()
 
-# calculateAccuracy(model, "train", True)
-# calculateAccuracy(model, "val", True)
+output = np.empty([0, 3])
+with torch.no_grad():
+    for batches, (images, labels) in enumerate(test_load):
+        # output_tensor = model(images.cuda().float())
+        output_tensor = model(images)
+        output = np.vstack((output, torch.as_tensor(output_tensor).cpu().numpy()))
 
-# accuracies = [calculateAccuracy(model, "test", False) for i in range(10)]
-# print(np.mean(accuracies))
+predictions = np.argmax(output, axis = 1)
 
-labelMap = {0:"ROCK", 1:"PAPER", 2:"SCISSORS"}
+accuracy = accuracy_score(labeltest, predictions)
 
-def predictPicture(pic):
-    model.eval()
-    with torch.no_grad():
-        dataTensor = torch.from_numpy(pic).float().reshape((1,1,150,150))
-        # output_tensor = model(dataTensor)
-        # output_numpy = output_tensor.numpy()
-        # certainties = np.exp(output_numpy).reshape(-1)
-        # predictionNum = np.argmax(output_numpy)
-        # prediction = labelMap[predictionNum]
-        # return prediction, certainties
-    
-        output_nodes = testModelConf(dataTensor)
-        outputConfidence = output_nodes[nodeConf].cpu().numpy()
-        outputEnd = output_nodes[nodeEnd].cpu().numpy()
+conf = confusion_matrix(labeltest, predictions)
 
-        confidences = outputConfidence[0]
-        certainties = np.exp(outputEnd).reshape(-1)
-        prediction = np.argmax(outputEnd, axis=1)[0]
-        # highestConfidence = confidences[prediction]
-        # predictedLabel = labelMap[prediction]
-        return prediction, certainties, confidences
+plt.figure(figsize=(10,8))
+plt.imshow(conf, cmap='viridis')
+for i in range(0,3):
+    for j in range(0,3):
+        plt.text(i, j, str(round(conf[i,j])), horizontalalignment='center', verticalalignment='center', fontsize=15, color='white')
+plt.colorbar()
+# plt.savefig("Figures/TestConfusionMatrix.pdf", bbox_inches='tight')
+plt.show()
 
 
-# data = np.load("Data/AdamTest/data_150_gray.npy")
-# labels = np.load("Data/AdamTest/labels.npy")
-# numTestSamples = data.shape[0]
-
-# tensor = torch.from_numpy(data).float().reshape((numTestSamples,1,150,150))
-
-# model.eval()
-# with torch.no_grad():
-#     output_tensor = model(tensor)
-#     predictions = np.argmax(torch.as_tensor(output_tensor).cpu().numpy(), axis=1)
-
-#     accuracy = accuracy_score(labels, predictions)
-#     print("Accuracy:", accuracy)
-#     print("Confusion matrix:")
-#     print(confusion_matrix(labels, predictions))
-
-from DataTester import DataTester
-
-dataTester = DataTester(predictPicture)
-while dataTester.running:
-    dataTester.update()
+# SAVE MODEL .pkl
+if saveModel:
+    print("Saving model... ", end='', flush=True)
+    model_parameters = model.state_dict()
+    with open(modelFilePath, "wb") as file:
+        pickle.dump(model_parameters, file)
+    print("Done!")

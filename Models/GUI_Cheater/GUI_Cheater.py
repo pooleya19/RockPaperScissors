@@ -20,7 +20,7 @@ import sys
 # import gc
 import pickle
 
-
+modelFilePath = "../Params_All2_1.pkl"
 
 # LOAD BASE DATA (only once)
 print("Loading data... ",end='',flush=True)
@@ -30,7 +30,6 @@ print("Done!")
 print("Size of BASE_DATA:",sys.getsizeof(BASE_DATA))
 print("Size of BASE_LABELS:",sys.getsizeof(BASE_LABELS))
 
-modelFilePath = "../Params_All2_1.pkl"
 
 
 figsize = 150
