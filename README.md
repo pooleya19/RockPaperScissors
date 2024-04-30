@@ -11,24 +11,23 @@ Submitted as our final project for ECE 6254 Statistical Machine Learning at Geor
     ```
 
 ## Collecting a Dataset
-1. Set up a fixed camera rig for training *and* testing. The picture below shows our fixed camera rig, using a USB webcam pointed at a sheet of poster board.
-    <!-- ![Camera Rig](/README_Figures/CameraRig.jpg) -->
-    <img src="/README_Figures/CameraRig.jpg" alt="drawing" width="200"/>
-2. Take pictures for training:
+1. Set up a fixed camera rig for training *and* testing. The picture below shows our fixed camera rig, using a USB webcam pointed at a sheet of poster board. \
+    <img src="/README_Figures/CameraRig.jpg" alt="drawing" width="400"/>
+3. Take pictures for training:
     1. In [DataCollection/DataCollector.py](/DataCollection/DataCollector.py), change line 10 to include the name of the existing folder you would like pictures saved in.
     2. Run the data collection script located in [DataCollection/](/DataCollection/) with the following command:
         ```
         py main_collection.py
         ```
     3. Once the script begins and the GUI appears, position your hand in the camera frame in a rock, paper, or scissors shape. Then, hold down 0, 1, or 2 respectively for rock, paper, or scissors, to take pictures at 30 Hz measuring 300x300 pixels. These pictures will be saved in the specified directory and labeled. Press ESCAPE or close the GUI to stop the script.
-3. After taking pictures, flatten and save the pictures as ```.npy``` files:
+4. After taking pictures, flatten and save the pictures as ```.npy``` files:
     1. In [DataCollection/main_compaction.py](/DataCollection/main_compaction.py), change lines 10 and 11 to include the folder(s) containing input images and the folder in which the ```data.npy``` and ```labels.npy``` files will be saved.
     2. Run the data compaction script located in [DataCollection/](/DataCollection/) with the following command:
         ```
         py main_compaction.py
         ```
     3. If successful, you should be able to see new files in your specified output directory named ```data.npy``` and ```labels.npy```.
-4. After flattening the images into ```data.npy``` and ```labels.npy``` files, post-process the data:
+5. After flattening the images into ```data.npy``` and ```labels.npy``` files, post-process the data:
     1. In [DataCollection/main_postProcess.py](/DataCollection/main_postProcess.py), change line 4 to include the folder containing the unprocessed ```data.npy``` file.
     2. Run the post-processing script located in [DataCollection/](/DataCollection/) with the following command:
         ```
