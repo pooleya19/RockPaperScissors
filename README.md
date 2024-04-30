@@ -1,6 +1,6 @@
 # Real-Time Interactive Rock-Paper-Scissors Using a Convolutional Neural Network
 Developed by Adam Pooley, Oscar Jed Chuy, and Jack Curtis. \
-Submitted as our final project for ECE 6254 Statistical Machine Learning at Georgia Tech.
+Submitted as our final project for ECE 6254 Statistical Machine Learning at Georgia Tech. \
 Video summary available at: [https://youtu.be/bNuyBQhNVYU](https://youtu.be/bNuyBQhNVYU)
 
 ## Setting Up the Environment
