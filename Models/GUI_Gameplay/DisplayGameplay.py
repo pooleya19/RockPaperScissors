@@ -213,8 +213,12 @@ class DisplayGameplay:
         if elapsedTime >= self.loadTime + 3*self.gameDelay + self.cheatDelay and self.playing:
             strategyFunc = self.strategy
             self.move = strategyFunc()
+            startTime = time.time()
             while self.makePredictionFunc() is None:
                 pass
+            endTime = time.time()
+            elapsedMoveTime = endTime - startTime
+            print("ELAPSED TIME: ", elapsedMoveTime, sep='')
             self.playing = False
         textSurface_gameStart = getTextSurface(gameStartText, size=25)
 

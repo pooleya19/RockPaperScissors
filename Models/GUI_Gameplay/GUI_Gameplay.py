@@ -302,6 +302,9 @@ def storeCorrectMove(move):
         WINS_HUMAN = WINS_HUMAN + 1
     else:
         print("SOMETHING WENT WRONG (result = ", result, ")", sep='')
+    
+    printMoveSummary()
+    printKDA()
 
 def printMoveSummary():
     print("MOVES_HUMAN_TRUE:\n\t",end='')
@@ -324,8 +327,8 @@ from DisplayGameplay import DisplayGameplay
 display = DisplayGameplay(predictPicture, makeMove, storeCorrectMove, readyToPlay)
 while display.running:
     display.update()
-    printMoveSummary()
-    printKDA()
+    # printMoveSummary()
+    # printKDA()
     # printKDA()
     # print("WINS:",WINS_HUMAN)
 print("\n\nFINAL:")
